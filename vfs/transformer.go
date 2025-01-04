@@ -1,6 +1,7 @@
 package vfs
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -24,10 +25,14 @@ func NewTransformer() *Transformer {
 	}
 }
 
-func (t *Transformer) SetEncryptor(encryptor Encryptor, secret []byte) {
+func (t *Transformer) SetEncryptor(encryptor Encryptor, secret []byte) error {
+	if len(t.secret) < 16 {
+		return errors.New("secret char length too short")
+	}
 	t.enable = true
 	t.secret = secret
 	t.Encryptor = encryptor
+	return nil
 }
 
 // fd 必须实现 io.ReadWriteCloser 接口

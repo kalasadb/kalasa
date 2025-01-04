@@ -114,6 +114,7 @@ func runAsDaemon() {
 	}
 
 	clog.Infof("Daemon launched PID: %d", cmd.Process.Pid)
+	os.Exit(0)
 }
 
 func runServer() {
@@ -126,8 +127,9 @@ func runServer() {
 	}
 
 	fss, err := vfs.OpenFS(&vfs.Options{
-		FsPerm: conf.FsPerm,
-		Path:   conf.Settings.Path,
+		FsPerm:    conf.FsPerm,
+		Path:      conf.Settings.Path,
+		Threshold: 3,
 	})
 	if err != nil {
 		clog.Failed(err)
@@ -146,6 +148,7 @@ func runServer() {
 	time.Sleep(500 * time.Millisecond)
 	clog.Infof("HTTP server started at http://%s:%d 🚀", hts.IPv4(), hts.Port())
 
+	// Keep the main process alive
 	select {}
 }
 
