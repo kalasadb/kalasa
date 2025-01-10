@@ -511,16 +511,16 @@ func crashRecoveryAllIndex(regions map[uint64]*os.File, indexs []*indexMap) erro
 			return fmt.Errorf("data file does not exist regions id: %d", regionId)
 		}
 
-		segment, err := parseSegment(fd, uint64(offset), 34)
+		inum, segment, err := parseSegment(fd, uint64(offset), 34)
 		if err != nil {
 			return fmt.Errorf("failed to parse data file segment: %w", err)
 		}
 
-		imap := indexs[HashSum64("")%uint64(indexShard)]
+		imap := indexs[inum%uint64(indexShard)]
 		if imap != nil {
 			if segment.Tombstone == 1 {
 				// 删除索引
-				delete(imap.index, HashSum64(""))
+				delete(imap.index, inum)
 				continue
 			}
 			// 否则继续往下执行，构建重新 inode 索引
@@ -600,8 +600,8 @@ func checkFileSystem(path string) error {
 	return nil
 }
 
-func parseSegment(fd *os.File, offset uint64, bufsize uint64) (Segment, error) {
-	return Segment{}, nil
+func parseSegment(fd *os.File, offset uint64, bufsize uint64) (inum, Segment, error) {
+	return 0, Segment{}, nil
 }
 
 func generateFileName(regionID uint64) (string, error) {
